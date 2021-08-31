@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -18,18 +18,24 @@ import MapPreview from "../components/MapPreview";
 const NewPlaceScreen = (props: Object) => {
   const [title, setTitle] = useState("");
   const [selectedImage, setSelectedImage] = useState("");
+  const [selectedLocation, setSelectedLocation] = useState({});
+
   const titleChangeHandler = (text: string) => {
     setTitle(text);
   };
   const dispatch = useDispatch();
 
   const savePlaceHandler = () => {
-    dispatch(placesActions.addPlace(title, selectedImage));
+    dispatch(placesActions.addPlace(title, selectedImage, selectedLocation));
     props.navigation.goBack();
   };
   const imageTakenHandler = (imagePath: string) => {
     setSelectedImage(imagePath);
   };
+
+  const locationPickedHandler = useCallback((location) => {
+    setSelectedLocation(location);
+  }, []);
 
   return (
     <ScrollView>
@@ -41,7 +47,11 @@ const NewPlaceScreen = (props: Object) => {
           value={title}
         />
         <ImgPicker onImageTaken={imageTakenHandler} />
-        <LocationPicker />
+        <LocationPicker
+          navigation={props.navigation}
+          route={props.route}
+          onLocationPicked={locationPickedHandler}
+        />
         <Button
           title="Save Place"
           color={Colors.primary}

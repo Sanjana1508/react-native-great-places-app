@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as Camera from "expo-camera";
 
 import Colors from "../constants/Colors";
+import { ImageInfo } from "expo-image-picker/build/ImagePicker.types";
 
 type imageType = {
   cancelled: boolean;
@@ -14,7 +15,7 @@ type imageType = {
 };
 
 const ImgPicker = (props: Object) => {
-  const [pickedImage, setPickedImage] = useState();
+  const [pickedImage, setPickedImage] = useState("");
   const verifyPermissions = async () => {
     const result = await Camera.requestCameraPermissionsAsync();
     if (result.status !== "granted") {
@@ -38,8 +39,9 @@ const ImgPicker = (props: Object) => {
       aspect: [16, 9],
       quality: 0.5,
     });
-    setPickedImage(image.uri);
-    props.onImageTaken(image.uri);
+    const { uri } = image as ImageInfo;
+    setPickedImage(uri);
+    props.onImageTaken(uri);
   };
   return (
     <View style={styles.imagePicker}>

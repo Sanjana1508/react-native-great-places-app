@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Button,
@@ -14,6 +14,19 @@ import MapPerview from "./MapPreview";
 const LocationPicker = (props: Object) => {
   const [pickedLocation, setPickedLocation] = useState({ lat: 0, lng: 0 });
   const [isFetching, setIsFetching] = useState(false);
+
+  const mapPickedLocation = props.route.params
+    ? props.route.params.pickedLocation
+    : null;
+
+  const { onLocationPicked } = props;
+
+  useEffect(() => {
+    if (mapPickedLocation) {
+      setPickedLocation(mapPickedLocation);
+      onLocationPicked(mapPickedLocation);
+    }
+  }, [mapPickedLocation, onLocationPicked]);
 
   const verifyPermissions = async () => {
     const result = await Location.requestForegroundPermissionsAsync();
@@ -43,6 +56,10 @@ const LocationPicker = (props: Object) => {
         lat: location.coords.latitude,
         lng: location.coords.longitude,
       });
+      props.onLocationPicked({
+        lat: location.coords.latitude,
+        lng: location.coords.longitude,
+      });
     } catch (err) {
       Alert.alert("Could not  fetch location", "Pick the location on the map", [
         { text: "Okay" },
@@ -50,21 +67,36 @@ const LocationPicker = (props: Object) => {
     }
     setIsFetching(false);
   };
+
+  const pickOnMapHandler = () => {
+    props.navigation.navigate("Map");
+  };
+
   return (
     <View style={styles.locationPicker}>
-      <View style={styles.mapPreview}>
+      <MapPerview
+        style={styles.mapPreview}
+        location={pickedLocation}
+        onPress={pickOnMapHandler}
+      >
         {isFetching ? (
           <ActivityIndicator size="large" color={Colors.primary} />
         ) : (
           <Text>No location picked yet.</Text>
         )}
+      </MapPerview>
+      <View style={styles.actions}>
+        <Button
+          title="get user location"
+          color={Colors.primary}
+          onPress={getLocationHandler}
+        />
+        <Button
+          title="Pick on map"
+          color={Colors.primary}
+          onPress={pickOnMapHandler}
+        />
       </View>
-
-      <Button
-        title="get user location"
-        color={Colors.primary}
-        onPress={getLocationHandler}
-      />
     </View>
   );
 };
@@ -79,8 +111,11 @@ const styles = StyleSheet.create({
     height: 150,
     borderColor: "#ccc",
     borderWidth: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
   },
 });
 
