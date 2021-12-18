@@ -19,15 +19,32 @@ export default (state = initialState, action: AnyAction) => {
       const newPlace = new Place(
         action.placeData.id,
         action.placeData.title,
-        action.placeData.image
+        action.placeData.image,
+        action.placeData.address,
+        action.placeData.coords.lat,
+        action.placeData.coords.lng
       );
 
       return { places: state.places.concat(newPlace) };
     case SET_PLACES:
       return {
         places: action.places.map(
-          (pl: placesResultType["rows"]["_array"][0]) =>
-            new Place(pl.id.toString(), pl.title, pl.imageUri)
+          (pl: {
+            id: { toString: () => string };
+            title: string;
+            imageUri: string;
+            address: string;
+            lat: number;
+            lng: number;
+          }) =>
+            new Place(
+              pl.id.toString(),
+              pl.title,
+              pl.imageUri,
+              pl.address,
+              pl.lat,
+              pl.lng
+            )
         ),
       };
     default:
